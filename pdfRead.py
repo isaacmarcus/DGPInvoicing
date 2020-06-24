@@ -3,10 +3,13 @@ import PyPDF2
 import re
 import os
 import tkinter as tk
+from tkinter import messagebox
 from tkinter.filedialog import askdirectory
 
 root = tk.Tk()
 root.withdraw()
+
+messagebox.showinfo(message="Please select Invoice Folder, followed by Delivery Orders Folder")
 
 # Call the tkinter library to ask user to choose invoice and do folders
 invFolderPath = askdirectory(title='Select Invoices Folder') + "/"  # ask user to select invoices folder
@@ -65,7 +68,7 @@ for filename in os.listdir(invFolderPath):
 
         # Handle case where no Delivery order was found in the pdf
         if doMatch is None:
-            print(filename)
+            #print(filename)
             missingDOMerger = PyPDF2.PdfFileMerger()
             missingDOMerger.append(currentInvoiceFile)
             missingDOMerger.write(missingDOFolder + filename)
@@ -75,3 +78,5 @@ for filename in os.listdir(invFolderPath):
 
     else:  # ending for IF CONTAINS .PDF IN NAME ELSE
         continue
+
+messagebox.showinfo(title="DO Invoice Merging", message="Merging Complete")
