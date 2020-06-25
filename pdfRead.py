@@ -61,9 +61,12 @@ re_param = "A€[\d]{6}"
 # re_param2 = "A[\d]{6}"  # TODO Create key terms for DO numbers without "A" starter
 
 # Function to parse invoices
-parseinvoices.parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder, invNoDOFolder, invNoMatchFolder, re_param)
+parsedInfo = parseinvoices.parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder, invNoDOFolder, invNoMatchFolder, re_param)
 
-messagebox.showinfo(title="DO Invoice Merging", message="Merging Complete")
+messagebox.showinfo(title="DO Invoice Merging Complete", message="Invoices merged with no errors: " + str(parsedInfo[0])
+                    + "\nInvoices merged with some missing DOs: " + str(parsedInfo[1]) + "\n"
+                    + "Invoices with no matching DOs: " + str(parsedInfo[2]) + "\n"
+                    + "Invoices with no DO Numbers found: " + str(parsedInfo[3]))
 
 
 
