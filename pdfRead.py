@@ -3,11 +3,34 @@ import PyPDF2
 import re
 import os
 import tkinter as tk
+import copypdfto
 from tkinter import messagebox
 from tkinter.filedialog import askdirectory
 
-root = tk.Tk()
+
+
+root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
 root.withdraw()
+Height = 450
+Width = 500
+
+# Main canvas widget for our window
+# mainCanvas = tk.Canvas(root, height=Height, width=Width)
+# mainCanvas.pack()
+#
+# mainFrame = tk.LabelFrame(root)
+# mainFrame.place(relx=0.025, rely=0.025, relwidth=0.95, relheight=0.95)
+#
+# invPathFrame = tk.Frame(mainFrame, bg="#e0e0e0", bd=5)
+# invPathFrame.place(relx=0.025, rely=0.025, relheight=0.1, relwidth=0.95)
+#
+# invPathLabelFrame = tk.Frame(invPathFrame, bg="#cccccc", bd=5)
+# invPathLabelFrame.place(relx=0, rely=0.025, relheight=0.9, relwidth=0.65)
+#
+# invPathButton = tk.Button(invPathFrame)
+
+# titleLabel = tk.Label(root)
+
 
 messagebox.showinfo(message="Please select Invoice Folder, followed by Delivery Orders Folder")
 
@@ -17,17 +40,21 @@ doFolderPath = askdirectory(title='Select Delivery Orders Folder') + "/"  # ask 
 
 # make a directory for invoices missing DO as well as completed merged invoices
 try:
+    os.mkdir(invFolderPath + "Merged Invoices Incomplete")
     os.mkdir(invFolderPath + "Merged Invoices")
-    os.mkdir(invFolderPath + "Invoices Missing DO")
+    os.mkdir(invFolderPath + "Invoice no Do Number")
+    os.mkdir(invFolderPath + "Invoice no Matching DO")
 except Exception as e:
-    print(e)
+    print("Directory already exists, no need to create again..")
 
+incMergedFolder = invFolderPath + "Merged Invoices Incomplete/"
 outputFolder = invFolderPath + "Merged Invoices/"
-missingDOFolder = invFolderPath + "Invoices Missing DO/"
+invNoDOFolder = invFolderPath + "Invoice no Do Number/"
+invNoMatchFolder = invFolderPath + "Invoice no Matching DO/"
 
 # define key terms
 re_param = "A€[\d]{6}"
-#re_param2 = "A[\d]{6}"  # for use in the future if we need to check more variations of DO No.
+# re_param2 = "A[\d]{6}"  # for use in the future if we need to check more variations of DO No.
 
 # loop through files in specified folder path
 for filename in os.listdir(invFolderPath):
@@ -40,39 +67,52 @@ for filename in os.listdir(invFolderPath):
 
         # Loop through pages of the current pdf to find delivery order number
         doNumber = ""
-        doMatch = None
+        doMatchStatus = "unfound"
         for i in range(0, NumPages):
             # Get current page and store in object
             PageObj = currentInvoiceFile.getPage(i)
             # Extract text from current page
             Text = PageObj.extractText()
             # Search for a match of the do number
-            doMatch = re.search(re_param, Text)
-            if doMatch:
-                # if match is found, store in doNumber object
-                doNumber = doMatch.string[doMatch.start():doMatch.end()].replace("€", "")
+            doMatch = re.findall(re_param, Text)
+            doMatchSize = len(doMatch)
 
-                # Loop through do folder to check for matches
-                for curDOFile in os.listdir(doFolderPath):
-                    # If match is found, start merging that file
-                    if curDOFile.endswith(".pdf") and doNumber in curDOFile:
-                        pdfMergeObj = PyPDF2.PdfFileMerger()
-                        pdfMergeObj.append(currentInvoiceFile)
-                        pdfMergeObj.append(PyPDF2.PdfFileReader(doFolderPath + curDOFile))
-                        # Create new file in designated output folder
-                        pdfMergeObj.write(outputFolder + filename.replace(".pdf", "") + "_" + doNumber + ".pdf")
-                        # close the merge object after done merging and writing
-                        pdfMergeObj.close()
+            # If any DO number numbers were found, proceed
+            if doMatchSize > 0:
+                doMatchCounter = 0
+                doOutputName = ""
+                pdfOutMerge = PyPDF2.PdfFileMerger()
+                pdfOutMerge.append(currentInvoiceFile)
+                # Parse through list of DO numbers found
+                for curDONumber in doMatch:
+                    tempDoNumber = curDONumber.replace("€", "")  # syntax
+                    # loop through all do files in do folder to find match for current do number
+                    for curDOFile in os.listdir(doFolderPath):
+                        if curDOFile.endswith(".pdf") and tempDoNumber in curDOFile:
+                            # append the current do file if a match is found
+                            pdfOutMerge.append(PyPDF2.PdfFileReader(doFolderPath + curDOFile))
+                            doOutputName += tempDoNumber
+                            doMatchCounter += 1
+                # case where all matches were found
+                if doMatchCounter == doMatchSize:
+                    doMatchStatus = "allfound"
+                    pdfOutMerge.write(outputFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_" + doOutputName + ".pdf")
+                    pdfOutMerge.close()
+                # case where some matches were found
+                elif doMatchSize > doMatchCounter > 0:
+                    doMatchStatus = "somefound"
+                    pdfOutMerge.write(incMergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_" + doOutputName + ".pdf")
+                    pdfOutMerge.close()
+                # case where no matches were found
+                else:
+                    doMatchStatus = "nonefound"
+                    copypdfto.copy_file_to(currentInvoiceFile, invNoMatchFolder, filename)
             else:
                 continue
 
-        # Handle case where no Delivery order was found in the pdf
-        if doMatch is None:
-            #print(filename)
-            missingDOMerger = PyPDF2.PdfFileMerger()
-            missingDOMerger.append(currentInvoiceFile)
-            missingDOMerger.write(missingDOFolder + filename)
-            missingDOMerger.close()
+        # handle case where no do number found in invoice pdf
+        if doMatchStatus == "unfound":
+            copypdfto.copy_file_to(currentInvoiceFile, invNoDOFolder, filename)
         else:
             continue
 
@@ -80,3 +120,7 @@ for filename in os.listdir(invFolderPath):
         continue
 
 messagebox.showinfo(title="DO Invoice Merging", message="Merging Complete")
+
+
+
+
