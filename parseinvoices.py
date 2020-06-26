@@ -24,6 +24,7 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
         if filename.endswith(".pdf"):
             invFileCount += 1
 
+    # TODO add tkinter progressbar popup
     print("Now processing all " + str(invFileCount) + " invoices found in folder selected... \n")
     # loop through files in specified folder path
     for filename in os.listdir(invFolderPath):
@@ -46,6 +47,7 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
                 PageObj = currentInvoiceFile.getPage(i)
                 # Extract text from current page
                 Text = PageObj.extractText()
+                print(Text)
                 # Search for all matches of do numbers without "A"
                 doMatch = re.findall(re_param, Text)
                 # Search for all matches of do numbers with "A"
