@@ -7,6 +7,10 @@ from tkinter.filedialog import askdirectory
 # local packages
 import parseinvoices
 
+appVersion = 1.1
+
+print("Merge Invoice Tool " + str(appVersion) + "\n")
+
 root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
 root.withdraw()
 Height = 450
@@ -35,6 +39,14 @@ messagebox.showinfo(message="Please select Invoice Folder, followed by Delivery 
 invFolderPath = askdirectory(title='Select Invoices Folder') + "/"  # ask user to select invoices folder
 doFolderPath = askdirectory(title='Select Delivery Orders Folder') + "/"  # ask user to select invoices folder
 
+if invFolderPath == "":
+    print("No invoice folder selected...")
+elif doFolderPath == "":
+    print("No DO folder selected...")
+else:
+    print("Invoice folder path: " + invFolderPath)
+    print("DO folder path: " + doFolderPath + "\n")
+
 # Names for output folders to be defined here;
 mergedName = "Merged Invoices"
 incMergedName = "Merged Invoices Incomplete"
@@ -43,12 +55,13 @@ invNoMatchName = "Invoice no Matching DO"
 
 # make a directory for invoices missing DO as well as completed merged invoices
 try:
+    print("Creating output folders...")
     os.mkdir(invFolderPath + incMergedName)
     os.mkdir(invFolderPath + mergedName)
     os.mkdir(invFolderPath + invNoDoName)
     os.mkdir(invFolderPath + invNoMatchName)
 except Exception as e:
-    print("Directory already exists, no need to create again..")
+    print("Output directory already exists, program will not create them again" + "\n")
 
 # Create absolute folder path name variables
 incMergedFolder = invFolderPath + incMergedName + "/"
@@ -56,12 +69,9 @@ mergedFolder = invFolderPath + mergedName + "/"
 invNoDOFolder = invFolderPath + invNoDoName + "/"
 invNoMatchFolder = invFolderPath + invNoMatchName + "/"
 
-# define key terms
-re_param = "A€[\d]{6}"
-# re_param2 = "A[\d]{6}"  # TODO Create key terms for DO numbers without "A" starter
-
 # Function to parse invoices
-parsedInfo = parseinvoices.parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder, invNoDOFolder, invNoMatchFolder, re_param)
+parsedInfo = parseinvoices.parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder,
+                                                invNoDOFolder, invNoMatchFolder)
 
 messagebox.showinfo(title="DO Invoice Merging Complete", message="Invoices merged with no errors: " + str(parsedInfo[0])
                     + "\nInvoices merged with some missing DOs: " + str(parsedInfo[1]) + "\n"
