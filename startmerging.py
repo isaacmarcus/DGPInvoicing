@@ -1,8 +1,6 @@
 # import packages
 import os
-import tkinter as tk
 from tkinter import messagebox
-from tkinter.filedialog import askdirectory
 
 # local packages
 import parseinvoices

@@ -32,13 +32,14 @@ doPathHolderY = startButtonY - 0.095
 invPathHolderY = doPathHolderY - 0.09
 
 root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
-root.iconbitmap('dg_merge.ico')
+root.iconbitmap(r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge.ico")
+
 
 invFolderPath = StringVar()
 invFolderPath.set("select invoices folder...")
 doFolderPath = StringVar()
 doFolderPath.set("select delivery orders folder...")
-# root.withdraw()
+
 Height = 400
 Width = 500
 
