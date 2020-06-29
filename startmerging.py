@@ -7,7 +7,7 @@ import parseinvoices
 
 
 # Function to process invoices in folder
-def start_merging(invFolderSelected, doFolderSelected):
+def start_merging(invFolderSelected, doFolderSelected, root, progressBar):
     invFolderPath = str(invFolderSelected)
     doFolderPath = str(doFolderSelected)
 
@@ -45,7 +45,7 @@ def start_merging(invFolderSelected, doFolderSelected):
 
     # Function to parse invoices
     parsedInfo = parseinvoices.parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder,
-                                                    invNoDOFolder, invNoMatchFolder)
+                                                    invNoDOFolder, invNoMatchFolder, root, progressBar)
 
     messagebox.showinfo(title="DO Invoice Merging Complete", message="Invoices merged with no errors: " + str(parsedInfo[0])
                         + "\nInvoices merged with some missing DOs: " + str(parsedInfo[1]) + "\n"

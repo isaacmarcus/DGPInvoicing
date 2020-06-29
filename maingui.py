@@ -2,6 +2,8 @@ import tkinter as tk
 import hoverbutton
 import startmerging
 from tkinter import *
+from tkinter.ttk import *
+import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory
 
 appVersion = 1.1
@@ -18,6 +20,7 @@ mainBGColour = "#ffffff"
 pathSelectedColour = "#f2f2f2"
 buttonColour = "#e0e0e0"
 hoveringButtonColour = "#c9e1ff"
+progressBarColour = "#7db7ff"
 
 # measurements
 titleLabelY = 0.025
@@ -30,10 +33,16 @@ notesLabelHeight = 0.9
 startButtonY = 0.875
 doPathHolderY = startButtonY - 0.095
 invPathHolderY = doPathHolderY - 0.09
+progressBarY = 0.875
 
 root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
 root.iconbitmap(r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge.ico")
 
+# Styling for progress bar
+style = ttk.Style()
+style.theme_use('clam')
+style.configure("blue.Horizontal.TProgressbar", troughcolor=buttonColour, background=progressBarColour, foreground=progressBarColour,
+                darkcolor=progressBarColour, lightcolor=progressBarColour, bordercolor=buttonColour, bd=0)
 
 invFolderPath = StringVar()
 invFolderPath.set("select invoices folder...")
@@ -106,11 +115,15 @@ doPathButton = hoverbutton.HoverButton(doPathFrame, text="Browse", bd=1.25, reli
                                        activebackground=hoveringButtonColour, command=lambda: get_folder(doFolderPath, "Select delivery orders folder"))
 doPathButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
-# Start button to start running processing
+# Start button Frame to start running processing
 startButtonFrame = tk.Frame(mainFrame, bg=mainBGColour, bd=5)
 startButtonFrame.place(relx=0.025, rely=startButtonY, relheight=0.0975, relwidth=0.95)
+# Progress bar
+progressBar = Progressbar(startButtonFrame, orient=HORIZONTAL, style="blue.Horizontal.TProgressbar", length=100, mode="determinate")
+progressBar.place(relx=0, rely=0.1, relheight=0.9, relwidth=0.75)
+# Start button Widget
 startButton = hoverbutton.HoverButton(startButtonFrame, text="Start", bd=1.25, relief="flat", bg=buttonColour,
-                                      activebackground=hoveringButtonColour, command=lambda: startmerging.start_merging(invFolderPath.get(), doFolderPath.get()))
+                                      activebackground=hoveringButtonColour, command=lambda: startmerging.start_merging(invFolderPath.get(), doFolderPath.get(), root, progressBar))
 startButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
 

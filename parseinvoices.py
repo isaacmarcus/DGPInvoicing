@@ -10,7 +10,7 @@ re_param2 = "[\d]{1,2}€[A-Za-z]{3}€[\d]{4}\\n[\d]{7}\\n"
 re_param = "A€[\d]{6}"
 
 
-def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder, invNoDOFolder, invNoMatchFolder):
+def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFolder, invNoDOFolder, invNoMatchFolder, root, progressBar):
     # Create Variables for returning details of files processed
     unFoundCount = 0
     allFoundCount = 0
@@ -28,6 +28,7 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
     print("Now processing all " + str(invFileCount) + " invoices found in folder selected... \n")
     # loop through files in specified folder path
     for filename in os.listdir(invFolderPath):
+
         # start parsing the file only if its a pdf file
         if filename.endswith(".pdf"):
             # terminal info for process
@@ -98,7 +99,9 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
             else:
                 unFoundCount += 1
                 copypdfto.copy_file_to(currentInvoiceFile, invNoDOFolder, filename)
-
+            # Update progress bar
+            progressBar['value'] = invFileIndex / invFileCount * 100
+            root.update_idletasks()
         else:  # ending for IF CONTAINS .PDF IN NAME ELSE
             continue
 
