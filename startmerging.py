@@ -11,10 +11,10 @@ def start_merging(invFolderSelected, doFolderSelected, root, progressBar):
     invFolderPath = str(invFolderSelected)
     doFolderPath = str(doFolderSelected)
 
-    if invFolderPath == "select invoices folder...":
+    if invFolderPath == "select invoices folder..." or invFolderPath == "/":
         print("No invoice folder selected...")
         return messagebox.showinfo(title="", message="Please select an invoice folder...")
-    elif doFolderPath == "select delivery orders folder...":
+    elif doFolderPath == "select delivery orders folder..." or invFolderPath == "/":
         print("No DO folder selected...")
         return messagebox.showinfo(title="", message="Please select a delivery orders folder...")
     else:

@@ -24,7 +24,6 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
         if filename.endswith(".pdf"):
             invFileCount += 1
 
-    # TODO add tkinter progressbar popup
     print("Now processing all " + str(invFileCount) + " invoices found in folder selected... \n")
     # loop through files in specified folder path
     for filename in os.listdir(invFolderPath):

@@ -1,12 +1,20 @@
+import sys
+from os.path import dirname, join, basename
+try:
+    tcl_lib = join(sys._MEIPASS, "lib")
+    tcl_new_lib = join(dirname(dirname(tcl_lib)), basename(tcl_lib))
+    import shutil
+    shutil.copytree(src=tcl_lib, dst=tcl_new_lib)
+except Exception as e:
+    print(e)
+
 import tkinter as tk
 import hoverbutton
 import startmerging
-from tkinter import *
-from tkinter.ttk import *
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory
 
-appVersion = 1.1
+appVersion = 1.6
 print("Merge Invoice Tool " + str(appVersion) + "\n")
 
 
@@ -36,7 +44,11 @@ invPathHolderY = doPathHolderY - 0.09
 progressBarY = 0.875
 
 root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
-root.iconbitmap(r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge.ico")
+# root.iconbitmap(r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge.ico")
+try:
+    root.iconphoto(True, tk.PhotoImage(file=r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge_png.png"))
+except Exception as e:
+    print(e)
 
 # Styling for progress bar
 style = ttk.Style()
@@ -44,9 +56,9 @@ style.theme_use('clam')
 style.configure("blue.Horizontal.TProgressbar", troughcolor=buttonColour, background=progressBarColour, foreground=progressBarColour,
                 darkcolor=progressBarColour, lightcolor=progressBarColour, bordercolor=buttonColour, bd=0)
 
-invFolderPath = StringVar()
+invFolderPath = tk.StringVar()
 invFolderPath.set("select invoices folder...")
-doFolderPath = StringVar()
+doFolderPath = tk.StringVar()
 doFolderPath.set("select delivery orders folder...")
 
 Height = 400
@@ -119,7 +131,7 @@ doPathButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 startButtonFrame = tk.Frame(mainFrame, bg=mainBGColour, bd=5)
 startButtonFrame.place(relx=0.025, rely=startButtonY, relheight=0.0975, relwidth=0.95)
 # Progress bar
-progressBar = Progressbar(startButtonFrame, orient=HORIZONTAL, style="blue.Horizontal.TProgressbar", length=100, mode="determinate")
+progressBar = ttk.Progressbar(startButtonFrame, orient='horizontal', style="blue.Horizontal.TProgressbar", length=100, mode="determinate")
 progressBar.place(relx=0, rely=0.1, relheight=0.9, relwidth=0.75)
 # Start button Widget
 startButton = hoverbutton.HoverButton(startButtonFrame, text="Start", bd=1.25, relief="flat", bg=buttonColour,
@@ -128,3 +140,5 @@ startButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
 
 root.mainloop()
+
+#pyinstaller.exe -w --onefile --clean --icon dg_merge.ico -n MergeInvoiceTool1.5 maingui.py
