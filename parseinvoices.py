@@ -2,6 +2,8 @@ import copypdfto
 import PyPDF2
 import os
 import re
+import pandas as pd
+
 
 # Regex patterns for DO Numbers to be found
 # 4€May€2020\n7077852
@@ -23,6 +25,9 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
     for filename in os.listdir(invFolderPath):
         if filename.endswith(".pdf"):
             invFileCount += 1
+
+    # master do list to check against external excel later on
+    masterDoNumberList = []
 
     print("Now processing all " + str(invFileCount) + " invoices found in folder selected... \n")
     # loop through files in specified folder path
@@ -48,9 +53,9 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
                 # Extract text from current page
                 Text = PageObj.extractText()
                 print(Text)
-                # Search for all matches of do numbers without "A"
-                doMatch = re.findall(re_param, Text)
                 # Search for all matches of do numbers with "A"
+                doMatch = re.findall(re_param, Text)
+                # Search for all matches of do numbers without "A"
                 dateMatch = re.findall(re_param2, Text)
                 dateMatch = [newDO[-8:-1] for newDO in dateMatch]  # only take the do number
                 # append all found do numbers to master doNumberList
@@ -83,6 +88,7 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
                         mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
                         + firstDONumber + ".pdf")
                     pdfOutMerge.close()
+                    masterDoNumberList += doNumberList  # append do numbers to master list if all matches found
                 # case where some matches were found
                 elif doMatchSize > doMatchCounter > 0:
                     someFoundCount += 1
@@ -100,9 +106,16 @@ def parse_invoice_folder(invFolderPath, doFolderPath, incMergedFolder, mergedFol
                 copypdfto.copy_file_to(currentInvoiceFile, invNoDOFolder, filename)
             # Update progress bar
             progressBar['value'] = invFileIndex / invFileCount * 100
-            root.update_idletasks()
+            root.update_idletasks()  # call to update ui after changing progress bar value
         else:  # ending for IF CONTAINS .PDF IN NAME ELSE
             continue
 
+    print(str(masterDoNumberList))
+
     # return the count of all files processed
     return [allFoundCount, someFoundCount, noneFoundCount, unFoundCount]
+
+
+def checkForMissing(doList, externalList):
+    print(doList)
+    print(externalList)
