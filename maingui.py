@@ -13,6 +13,7 @@ except Exception as e:
 import tkinter as tk
 import hoverbutton
 import startmerging
+import parseinvoices
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
@@ -52,7 +53,6 @@ invPathHolderY = doPathHolderY - relHolderHeight
 invPathHolderAbsY = doPathHolderAbsY - 43
 
 
-# noinspection PyAttributeOutsideInit
 class MainGui:
     def __init__(self):
         self.root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
@@ -62,7 +62,7 @@ class MainGui:
                                 tk.PhotoImage(file=r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge_png.png"))
         except Exception as ex:
             print(ex)
-
+        self.mergeObj = startmerging.MergeHandler()
         # Setup UI
         self.setup_gui()
 
@@ -168,7 +168,7 @@ class MainGui:
         self.startButton = hoverbutton.HoverButton(self.startButtonFrame, text="Start", bd=1.25, relief="flat",
                                                    bg=buttonColour,
                                                    activebackground=hoveringButtonColour,
-                                                   command=lambda: startmerging.start_merging(self.invFolderPath.get(),
+                                                   command=lambda: self.mergeObj.start_merging(self.invFolderPath.get(),
                                                                                               self.doFolderPath.get(),
                                                                                               self.root,
                                                                                               self.progressBar))
@@ -191,23 +191,22 @@ class MainGui:
                                                       bg=buttonColour,
                                                       activebackground=hoveringButtonColour,
                                                       command=lambda: self.get_file(self.exDoFilePath,
-                                                                                    "Select delivery orders folder"))
+                                                                                    "Select external delivery order file..."))
         self.exDoPathButton.place(relx=0.525, rely=0.1, relheight=0.9, relwidth=0.225)
         # exDO button to run check TODO link to functionality in startmerging / parse invoices
         self.exDoPathCheckButton = hoverbutton.HoverButton(self.exDoPathFrame, text="Check", bd=1.25, relief="flat",
                                                            bg=buttonColour,
                                                            activebackground=hoveringButtonColour,
-                                                           command=lambda: self.get_folder(self.exDoFilePath,
-                                                                                           "Select delivery orders folder"))
+                                                           command=lambda: self.mergeObj.checkExternalDo(self.invFolderPath.get(), self.exDoFilePath.get()))
         self.exDoPathCheckButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
-        def get_folder(folderPath, title):
-            pathSelected = askdirectory(title=title) + "/"  # ask user to select invoices folder
-            folderPath.set(pathSelected)
+    def get_folder(self, folderPath, title):
+        pathSelected = askdirectory(title=title) + "/"  # ask user to select invoices folder
+        folderPath.set(pathSelected)
 
-        def get_file(filePath, title):
-            pathSelected = askopenfilename(title=title)  # ask user to select invoices folder
-            filePath.set(pathSelected)
+    def get_file(self, filePath, title):
+        pathSelected = askopenfilename(title=title, filetypes=[("Excel Files", "*.xlsm *.xls *.xlsx *.xlsb")])  # ask user to select invoices folder
+        filePath.set(pathSelected)
 
 
 if __name__ == "__main__":
