@@ -3,6 +3,7 @@ import PyPDF2
 import os
 import re
 import pandas as pd
+from tkinter import messagebox
 
 
 # Regex patterns for DO Numbers to be found
@@ -122,19 +123,41 @@ class ParseInvoices:
         # self.checkForMissing()
         return [self.allFoundCount, self.someFoundCount, self.noneFoundCount, self.unFoundCount]
 
-    def checkForMissing(self, invPath):
+    def checkForMissing(self, invPath, exDoPath):
         if self.masterDoList:
             for i in range(len(self.masterDoList)):
                 self.masterDoList[i] = self.masterDoList[i].replace("€", "")
-            print(self.masterDoList)
             # call method to write list of Do numbers to an excel sheet that can be used later
-            self.writeToExcel(self.masterDoList, invPath)
-        else:
-            print("master do list is empty")
+            self.writeToExcel(self.masterDoList, invPath, 'mergedDOList_' + str(self.allFoundCount) + "DO.xlsx")
 
-    def writeToExcel(self, listToExport, invPath):
+            try:
+                # read external do file
+                exDoDf = pd.read_excel(exDoPath, sheet_name="Done", header=0, dtype=str)
+                exDoList = []
+                # reformat all the DOs so they have no space included
+                for do in exDoDf["D.O. #"].iteritems():
+                    exDoList.append(do[1].replace(" ", ""))
+
+                # compare the two lists
+                missingDoList = list(set(exDoList).symmetric_difference(set(self.masterDoList)))
+
+                # write missing do list to excel file
+                self.writeToExcel(missingDoList, invPath, 'missingDOList_' + str(len(missingDoList)) + "DO.xlsx")
+
+                messagebox.showinfo(title="Cross-check complete",
+                                    message="Delivery Orders cross-checked: " + str(len(exDoList)) +
+                                    "\nDelivery Orders merged: " + str(len(self.masterDoList)) +
+                                    "\nDelivery Orders missing: " + str(len(missingDoList)))
+            except Exception as e:
+                messagebox.showerror(title="Error",
+                                    message="Error cross-checking: \n" + str(e) + "\n\nPlease check if you have selected the correct file, and if the sheet / column names are labelled correctly")
+        else:
+            messagebox.showinfo(title="DOs have not been merged",
+                                message="The DO merge has not been complete yet.")
+
+    def writeToExcel(self, listToExport, invPath, fileName):
         df = pd.DataFrame(listToExport)
-        writer = pd.ExcelWriter(invPath + "Merged Invoices/" + 'mergedDOList_' + str(self.allFoundCount) + "DO.xlsx", engine='xlsxwriter')
+        writer = pd.ExcelWriter(invPath + "Merged Invoices/" + fileName, engine='xlsxwriter')
         df.to_excel(writer, index=False, header=False)
         writer.save()
 

@@ -60,10 +60,11 @@ class MergeHandler:
                             + "Invoices with no DO Numbers found: " + str(parsedInfo[3]))
 
     def checkExternalDo(self, invPath, exDoPath):
-        if exDoPath == "" or exDoPath == "Select external delivery order file...":
-            print("no file selected")
+        if exDoPath == "" or exDoPath == "select external delivery order list...":
+            messagebox.showinfo(title="Please select an excel file",
+                                message="No excel file containing DOs have been selected yet")
         else:
-            self.invoiceParser.checkForMissing(invPath)
+            self.invoiceParser.checkForMissing(invPath, exDoPath)
 
 
 

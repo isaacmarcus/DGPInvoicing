@@ -56,10 +56,9 @@ invPathHolderAbsY = doPathHolderAbsY - 43
 class MainGui:
     def __init__(self):
         self.root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
-        # root.iconbitmap(r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge.ico")
         try:
-            self.root.iconphoto(True,
-                                tk.PhotoImage(file=r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge_png.png"))
+            # TODO fix bug where iconphoto is not transferred to onefile export
+            self.root.iconphoto(True, tk.PhotoImage(file=r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge_png.png"))
         except Exception as ex:
             print(ex)
         self.mergeObj = startmerging.MergeHandler()
@@ -175,7 +174,7 @@ class MainGui:
         self.startButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
         # --------------------------------------------------------
-        # EXTERNAL DO EXCEL frame holding the path and button for it TODO change browse button to choose file, add in functionality in parseinvoices/starmerging
+        # EXTERNAL DO EXCEL frame holding the path and button for it
         self.exDoPathFrame = tk.Frame(self.mainFrame, bg=mainBGColour, bd=5)
         self.exDoPathFrame.place(relx=0.025, y=exDoPathHolderAbsY, relwidth=0.95, relheight=relHolderHeight)
         # exDO path name box
@@ -193,7 +192,7 @@ class MainGui:
                                                       command=lambda: self.get_file(self.exDoFilePath,
                                                                                     "Select external delivery order file..."))
         self.exDoPathButton.place(relx=0.525, rely=0.1, relheight=0.9, relwidth=0.225)
-        # exDO button to run check TODO link to functionality in startmerging / parse invoices
+        # exDO button to run check
         self.exDoPathCheckButton = hoverbutton.HoverButton(self.exDoPathFrame, text="Check", bd=1.25, relief="flat",
                                                            bg=buttonColour,
                                                            activebackground=hoveringButtonColour,
