@@ -1,23 +1,11 @@
-import sys
-from os.path import dirname, join, basename
-
-try:
-    tcl_lib = join(sys._MEIPASS, "lib")
-    tcl_new_lib = join(dirname(dirname(tcl_lib)), basename(tcl_lib))
-    import shutil
-
-    shutil.copytree(src=tcl_lib, dst=tcl_new_lib)
-except Exception as e:
-    print(e)
-
+import resourcepath as rp
 import tkinter as tk
 import hoverbutton
 import startmerging
-import parseinvoices
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
-appVersion = 1.6
+appVersion = 1.7
 print("Merge Invoice Tool " + str(appVersion) + "\n")
 
 # colours
@@ -40,8 +28,8 @@ titleLabelHeight = 0.09
 bodyLabelY = titleLabelY + titleLabelHeight
 bodyLabelHeight = 0.15
 notesLabelFrameY = bodyLabelY + bodyLabelHeight + 0.0075
-notesLabelFrameHeight = 0.3
-notesLabelHeight = 0.9
+notesLabelFrameHeight = 0.375
+notesLabelHeight = 0.95
 exDoPathHolderY = 0.875
 exDoPathHolderAbsY = Height - 45
 startButtonY = exDoPathHolderY - relHolderHeight
@@ -57,8 +45,8 @@ class MainGui:
     def __init__(self):
         self.root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
         try:
-            # TODO fix bug where iconphoto is not transferred to onefile export
-            self.root.iconphoto(True, tk.PhotoImage(file=r"C:\Users\DGP-Yoga1\PycharmProjects\DGPInvoicing\dg_merge_png.png"))
+            # TODO check bug where iconphoto is not transferred to onefile export
+            self.root.iconphoto(True, tk.PhotoImage(file=rp.resource_path("dg_merge_png.png")))
         except Exception as ex:
             print(ex)
         self.mergeObj = startmerging.MergeHandler()
@@ -110,7 +98,10 @@ class MainGui:
                                         "\n'Invoice no Do Number' : contains invoices with no do number found"
                                         "\n'Invoice no Matching DO' : contains invoices with no matching do file"
                                         "\n'Merged Invoices' : contains successfully merged invoices"
-                                        "\n'Merged Invoices Incomplete' : contains invoices with some do files found",
+                                        "\n'Merged Invoices Incomplete' : contains invoices with some do files found"
+                                        "\n\nCross-checker will output two excel files upon completion:"
+                                        "\n1. mergedDOList - containing DO numbers successfully merged"
+                                        "\n2. missingDOList - containing DO numbers that are missing",
                                    anchor="nw", justify="left")
         self.notesLabel.configure(font=("Helvetica", 9))
         self.notesLabel.place(relx=0.01, rely=0, relheight=notesLabelHeight, relwidth=0.99)

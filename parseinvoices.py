@@ -123,12 +123,14 @@ class ParseInvoices:
         # self.checkForMissing()
         return [self.allFoundCount, self.someFoundCount, self.noneFoundCount, self.unFoundCount]
 
+    # function to check succesfully merged DOs against external Done List
     def checkForMissing(self, invPath, exDoPath):
         if self.masterDoList:
             for i in range(len(self.masterDoList)):
                 self.masterDoList[i] = self.masterDoList[i].replace("€", "")
+            masterDF = pd.DataFrame(self.masterDoList, columns=["do_number"])
             # call method to write list of Do numbers to an excel sheet that can be used later
-            self.writeToExcel(self.masterDoList, invPath, 'mergedDOList_' + str(self.allFoundCount) + "DO.xlsx")
+            self.writeToExcel(masterDF, invPath, 'mergedDOList_' + str(self.allFoundCount) + "DO.xlsx", ["do_number"])
 
             try:
                 # read external do file
@@ -136,18 +138,21 @@ class ParseInvoices:
                 exDoList = []
                 # reformat all the DOs so they have no space included
                 for do in exDoDf["D.O. #"].iteritems():
-                    exDoList.append(do[1].replace(" ", ""))
+                    exDoList.append(do[1].replace(" ", ""))  # append to exDoList
+                    exDoDf.replace(do[1], do[1].replace(" ", ""), inplace=True)  # replace dataframe with do without space
+                # rename column of DO number to sth more accessible
+                exDoDf.rename(columns={"D.O. #": "do_number"}, inplace=True)
+                exDoDf.drop(columns=["DO Status", "Invoice number"], inplace=True)  # drop columns we dont need
 
-                # compare the two lists
+                # compare the two lists and create a new list with the ones missing
                 missingDoList = list(set(exDoList).symmetric_difference(set(self.masterDoList)))
-
-                # write missing do list to excel file
-                self.writeToExcel(missingDoList, invPath, 'missingDOList_' + str(len(missingDoList)) + "DO.xlsx")
+                excludeMatchDf = exDoDf[~exDoDf["do_number"].isin(self.masterDoList)]  # create a new df without the ones matching
+                self.writeToExcel(excludeMatchDf, invPath, 'missingDOList_' + str(excludeMatchDf['do_number'].count()) + "DO.xlsx", excludeMatchDf.columns)
 
                 messagebox.showinfo(title="Cross-check complete",
                                     message="Delivery Orders cross-checked: " + str(len(exDoList)) +
                                     "\nDelivery Orders merged: " + str(len(self.masterDoList)) +
-                                    "\nDelivery Orders missing: " + str(len(missingDoList)))
+                                    "\nDelivery Orders missing: " + str(excludeMatchDf['do_number'].count()))
             except Exception as e:
                 messagebox.showerror(title="Error",
                                     message="Error cross-checking: \n" + str(e) + "\n\nPlease check if you have selected the correct file, and if the sheet / column names are labelled correctly")
@@ -155,10 +160,10 @@ class ParseInvoices:
             messagebox.showinfo(title="DOs have not been merged",
                                 message="The DO merge has not been complete yet.")
 
-    def writeToExcel(self, listToExport, invPath, fileName):
+    def writeToExcel(self, listToExport, invPath, fileName, headerList):
         df = pd.DataFrame(listToExport)
         writer = pd.ExcelWriter(invPath + "Merged Invoices/" + fileName, engine='xlsxwriter')
-        df.to_excel(writer, index=False, header=False)
+        df.to_excel(writer, index=False, header=headerList)
         writer.save()
 
 
