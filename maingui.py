@@ -67,7 +67,10 @@ class Window(tk.Frame):
         exit()
 
     def createEmailWindow(self):
-        self.emailWindow = tk.Toplevel(self.master)
+        self.emailWindow = tk.Toplevel(self.master, width=Width, height=Height)
+        self.emailWindow.wm_title("Email Login")
+        self.emailText = tk.Text(self.emailWindow, height=1.25, width=40, )
+        self.emailText.grid(row=0, column=0, padx=(10,10), pady=(10,10))
 
 
 class MainGui:
@@ -86,8 +89,6 @@ class MainGui:
     def setup_gui(self):
         # create menu bar at the top of window
         self.menuWindow = Window(self.root)
-        # self.emailWindow = tk.Toplevel(self.root)
-        # self.menuWindow
         # Styling for progress bar
         self.style = ttk.Style()
         self.style.theme_use('clam')

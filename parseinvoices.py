@@ -4,6 +4,9 @@ import os
 import re
 import pandas as pd
 from tkinter import messagebox
+import pdf2image as p2i
+import fpdf as fp
+import fitz
 
 
 # Regex patterns for DO Numbers to be found
@@ -49,7 +52,19 @@ class ParseInvoices:
 
                 # open the current pdf file
                 currentInvoiceFile = PyPDF2.PdfFileReader(invFolderPath + filename)
-
+                currentInvFileMu = fitz.open(invFolderPath + filename)
+                zoom_x = 2.0  # horizontal zoom
+                zoom_y = 2.0  # vertical zoom
+                mat = fitz.Matrix(zoom_x, zoom_y)  # zoom factor 2 in each dimension
+                # for page in currentInvFileMu:  # iterate through the pages
+                #     pix = page.getPixmap(matrix=mat)  # render page to an image
+                #     pix.writePNG("page-%i.png" % page.number)  # store image as a PNG
+                imgPdf = fitz.open()
+                pno = 0
+                for page in currentInvFileMu:
+                    imgPdf.insertPage(pno)
+                    pno += 1
+                # imgPdf.output("testoutput.pdf", "F")
                 # get number of pages for looping through later
                 NumPages = currentInvoiceFile.getNumPages()
 
@@ -88,15 +103,50 @@ class ParseInvoices:
                                 print("match found for " + str(tempDoNumber))
                                 # append the current do file if a match is found
                                 pdfOutMerge.append(PyPDF2.PdfFileReader(doFolderPath + curDOFile))
+                                mergeMu = fitz.open(doFolderPath + curDOFile)
+                                currentInvFileMu.insertPDF(mergeMu)
+                                for page in mergeMu:
+                                    imgPdf.insertPage(pno)
+                                    pno += 1
                                 doMatchCounter += 1
 
                     # case where all matches were found
                     if doMatchCounter == doMatchSize:
                         self.allFoundCount += 1
-                        pdfOutMerge.write(
-                            mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
-                            + firstDONumber + ".pdf")
-                        pdfOutMerge.close()
+                        try:
+                            pdfOutMerge.write(
+                                mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                + firstDONumber + ".pdf")
+                            pdfOutMerge.close()
+                            currentInvFileMu.save(mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                + firstDONumber + "MU.pdf")
+                            pno = 0  # page number to iterate
+                            # rect = fitz.Rect(0, 0, 100, 100)
+
+                            for page in currentInvFileMu:  # iterate through the pages
+                                rect = page.MediaBox
+                                # imgPdf.insertPage(rect)  TODO add insert page here instead of above
+                                pix = page.getPixmap(matrix=mat)  # render page to an image
+                                imgPdf[pno].insertImage(rect, pixmap=pix, overlay=True)
+                                pno += 1
+
+                            for page in mergeMu:  # iterate through the pages
+                                rect = page.MediaBox  # get dimensions of original page
+                                pix = page.getPixmap(matrix=mat)  # render page to an image
+                                imgPdf[pno].insertImage(rect, pixmap=pix, overlay=True)  # insert pixmap into new page
+                                pno += 1
+
+                            imgPdf.save(mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                + firstDONumber + "MUIMG.pdf")
+                        except Exception as e:
+                            print(e)
+                            messagebox.showinfo(title="Error",
+                                                message="File currently in use, please close instances of it")
+                        finally:
+                            imgPdf.save(
+                                mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                + firstDONumber + "MUIMG.pdf")
+
                         self.masterDoList += doNumberList  # append do numbers to master list if all matches found
                     # case where some matches were found
                     elif doMatchSize > doMatchCounter > 0:
