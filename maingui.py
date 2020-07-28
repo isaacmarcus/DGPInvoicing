@@ -5,7 +5,7 @@ import startmerging
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
-appVersion = 1.7
+appVersion = 1.8
 print("Merge Invoice Tool " + str(appVersion) + "\n")
 
 # colours
@@ -41,11 +41,39 @@ invPathHolderY = doPathHolderY - relHolderHeight
 invPathHolderAbsY = doPathHolderAbsY - 43
 
 
+class Window(tk.Frame):
+    def __init__(self, master=None):
+        tk.Frame.__init__(self, master)
+        self.master = master
+
+        menu = tk.Menu(self.master)
+        # remove tear off in menu
+        menu.option_add('*tearOff', False)
+        self.master.config(menu=menu)
+
+        # create file drop down menu
+        self.fileMenu = tk.Menu(menu)
+        self.fileMenu.add_command(label="Email Login", command=self.createEmailWindow)
+        self.fileMenu.add_command(label="Exit", command=self.exitProgram)
+        # cascade file drop down to main menu line
+        menu.add_cascade(label="File", menu=self.fileMenu)
+
+        # editMenu = tk.Menu(menu)
+        # editMenu.add_command(label="Undo")
+        # editMenu.add_command(label="Redo")
+        # menu.add_cascade(label="Edit", menu=editMenu)
+
+    def exitProgram(self):
+        exit()
+
+    def createEmailWindow(self):
+        self.emailWindow = tk.Toplevel(self.master)
+
+
 class MainGui:
     def __init__(self):
         self.root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
         try:
-            # TODO check bug where iconphoto is not transferred to onefile export
             self.root.iconphoto(True, tk.PhotoImage(file=rp.resource_path("dg_merge_png.png")))
         except Exception as ex:
             print(ex)
@@ -56,6 +84,10 @@ class MainGui:
         # self.root.mainloop()
 
     def setup_gui(self):
+        # create menu bar at the top of window
+        self.menuWindow = Window(self.root)
+        # self.emailWindow = tk.Toplevel(self.root)
+        # self.menuWindow
         # Styling for progress bar
         self.style = ttk.Style()
         self.style.theme_use('clam')
