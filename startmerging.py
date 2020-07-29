@@ -35,6 +35,7 @@ class MergeHandler:
 
         # make a directory for invoices missing DO as well as completed merged invoices
         try:
+            # TODO fix bug where if one of the folders has already been created, it stops it entirely, or does not create remaining folders
             print("Creating output folders...")
             os.mkdir(self.invFolderPath + incMergedName)
             os.mkdir(self.invFolderPath + mergedName)

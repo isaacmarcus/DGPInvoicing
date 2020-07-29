@@ -5,7 +5,7 @@ import startmerging
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
-appVersion = 1.8
+appVersion = 1.9
 print("Merge Invoice Tool " + str(appVersion) + "\n")
 
 # colours
@@ -58,11 +58,6 @@ class Window(tk.Frame):
         # cascade file drop down to main menu line
         menu.add_cascade(label="File", menu=self.fileMenu)
 
-        # editMenu = tk.Menu(menu)
-        # editMenu.add_command(label="Undo")
-        # editMenu.add_command(label="Redo")
-        # menu.add_cascade(label="Edit", menu=editMenu)
-
     def exitProgram(self):
         exit()
 
@@ -71,6 +66,7 @@ class Window(tk.Frame):
         self.emailWindow.wm_title("Email Login")
         self.emailText = tk.Text(self.emailWindow, height=1.25, width=40, )
         self.emailText.grid(row=0, column=0, padx=(10,10), pady=(10,10))
+        # TODO finish up UI for email login
 
 
 class MainGui:
@@ -88,7 +84,8 @@ class MainGui:
 
     def setup_gui(self):
         # create menu bar at the top of window
-        self.menuWindow = Window(self.root)
+        # TODO fully implement email login using smtplib
+        # self.menuWindow = Window(self.root)
         # Styling for progress bar
         self.style = ttk.Style()
         self.style.theme_use('clam')
