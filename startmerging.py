@@ -38,6 +38,7 @@ class MergeHandler:
             print("Creating output folders...")
             os.mkdir(self.invFolderPath + incMergedName)
             os.mkdir(self.invFolderPath + mergedName)
+            os.mkdir(self.invFolderPath + mergedName + "/imgversion")
             os.mkdir(self.invFolderPath + invNoDoName)
             os.mkdir(self.invFolderPath + invNoMatchName)
         except Exception as e:

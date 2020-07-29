@@ -33,6 +33,11 @@ class ParseInvoices:
         # master do list to check against external excel later on
         self.masterDoList = []
 
+        # variables for creating pixmap
+        zoom_x = 2  # horizontal zoom
+        zoom_y = 2  # vertical zoom
+        self.mat = fitz.Matrix(zoom_x, zoom_y)  # zoom factor 2 in each dimension
+
         # check how many files are to be processed
         invFileCount = 0
         invFileIndex = 0
@@ -53,19 +58,9 @@ class ParseInvoices:
                 # open the current pdf file
                 currentInvoiceFile = PyPDF2.PdfFileReader(invFolderPath + filename)
                 currentInvFileMu = fitz.open(invFolderPath + filename)
-                zoom_x = 2.0  # horizontal zoom
-                zoom_y = 2.0  # vertical zoom
-                mat = fitz.Matrix(zoom_x, zoom_y)  # zoom factor 2 in each dimension
-                # for page in currentInvFileMu:  # iterate through the pages
-                #     pix = page.getPixmap(matrix=mat)  # render page to an image
-                #     pix.writePNG("page-%i.png" % page.number)  # store image as a PNG
+                currentInvFileFitz = fitz.open(invFolderPath + filename)
+
                 imgPdf = fitz.open()
-                pno = 0
-                for page in currentInvFileMu:
-                    imgPdf.insertPage(pno)
-                    pno += 1
-                # imgPdf.output("testoutput.pdf", "F")
-                # get number of pages for looping through later
                 NumPages = currentInvoiceFile.getNumPages()
 
                 # Loop through pages of the current pdf to find delivery order number
@@ -92,8 +87,8 @@ class ParseInvoices:
                     print("Now finding for matches in DO folder...")
                     firstDONumber = doNumberList[0].replace("€", "")
                     doMatchCounter = 0
-                    pdfOutMerge = PyPDF2.PdfFileMerger()
-                    pdfOutMerge.append(currentInvoiceFile)  # append the invoice first as the first page of pdf
+                    # pdfOutMerge = PyPDF2.PdfFileMerger()
+                    # pdfOutMerge.append(currentInvoiceFile)  # append the invoice first as the first page of pdf
                     # Parse through list of DO numbers found
                     for curDONumber in doNumberList:
                         tempDoNumber = curDONumber.replace("€", "")  # syntax
@@ -102,59 +97,57 @@ class ParseInvoices:
                             if curDOFile.endswith(".pdf") and tempDoNumber in curDOFile:
                                 print("match found for " + str(tempDoNumber))
                                 # append the current do file if a match is found
-                                pdfOutMerge.append(PyPDF2.PdfFileReader(doFolderPath + curDOFile))
+                                # pdfOutMerge.append(PyPDF2.PdfFileReader(doFolderPath + curDOFile))
                                 mergeMu = fitz.open(doFolderPath + curDOFile)
                                 currentInvFileMu.insertPDF(mergeMu)
-                                for page in mergeMu:
-                                    imgPdf.insertPage(pno)
-                                    pno += 1
                                 doMatchCounter += 1
 
                     # case where all matches were found
                     if doMatchCounter == doMatchSize:
                         self.allFoundCount += 1
                         try:
-                            pdfOutMerge.write(
-                                mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
-                                + firstDONumber + ".pdf")
-                            pdfOutMerge.close()
+                            # pdfOutMerge.write(
+                            #     mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                            #     + firstDONumber + ".pdf")
+                            # pdfOutMerge.close()
                             currentInvFileMu.save(mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
-                                + firstDONumber + "MU.pdf")
-                            pno = 0  # page number to iterate
-                            # rect = fitz.Rect(0, 0, 100, 100)
-
-                            for page in currentInvFileMu:  # iterate through the pages
-                                rect = page.MediaBox
-                                # imgPdf.insertPage(rect)  TODO add insert page here instead of above
-                                pix = page.getPixmap(matrix=mat)  # render page to an image
-                                imgPdf[pno].insertImage(rect, pixmap=pix, overlay=True)
+                                + firstDONumber + ".pdf")
+                            pno = 0  # page number to iterate (resets here)
+                            for page in currentInvFileFitz:  # iterate through the pages
+                                rect = page.MediaBox  # get dimensions of the previous file that we are merging
+                                imgPdf.insertPage(pno, width=rect[2], height=rect[3])  # add insert page here based on previous file dimensions
+                                pix = page.getPixmap(matrix=self.mat)  # render page to an image
+                                imgPdf[pno].insertImage(rect, pixmap=pix, overlay=False)
                                 pno += 1
-
-                            for page in mergeMu:  # iterate through the pages
-                                rect = page.MediaBox  # get dimensions of original page
-                                pix = page.getPixmap(matrix=mat)  # render page to an image
-                                imgPdf[pno].insertImage(rect, pixmap=pix, overlay=True)  # insert pixmap into new page
-                                pno += 1
-
-                            imgPdf.save(mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
-                                + firstDONumber + "MUIMG.pdf")
+                            # weird issue where can't use the function twice in a row, may need to look into async queuing
+                            self.imgPdfCreator(mergeMu, imgPdf, pno)
+                            # save the pdf out into merged invoice directory
+                            imgPdf.save(mergedFolder + "/imgversion/" + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                + firstDONumber + "IMG.pdf", clean=True, deflate=True)
                         except Exception as e:
                             print(e)
-                            messagebox.showinfo(title="Error",
-                                                message="File currently in use, please close instances of it")
-                        finally:
-                            imgPdf.save(
-                                mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
-                                + firstDONumber + "MUIMG.pdf")
+                            if "cannot remove file" in str(e):
+                                messagebox.showinfo(title="Error",
+                                                    message="File currently in use, please close instances of it")
+                        # finally:
+                        #     imgPdf.save(
+                        #         mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                        #         + firstDONumber + "IMG.pdf")
 
                         self.masterDoList += doNumberList  # append do numbers to master list if all matches found
+
                     # case where some matches were found
                     elif doMatchSize > doMatchCounter > 0:
                         self.someFoundCount += 1
-                        pdfOutMerge.write(
-                            incMergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" +
-                            "_" + firstDONumber + ".pdf")
-                        pdfOutMerge.close()
+                        currentInvFileMu.save(
+                            incMergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                            + firstDONumber + ".pdf")
+                        imgPdf.save(incMergedFolder + "/imgversion/" + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                    + firstDONumber + "IMG.pdf", clean=True, deflate=True)
+                        # pdfOutMerge.write(
+                        #     incMergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" +
+                        #     "_" + firstDONumber + ".pdf")
+                        # pdfOutMerge.close()
                     # case where no matches were found
                     else:
                         self.noneFoundCount += 1
@@ -172,6 +165,14 @@ class ParseInvoices:
         # return the count of all files processed
         # self.checkForMissing()
         return [self.allFoundCount, self.someFoundCount, self.noneFoundCount, self.unFoundCount]
+
+    def imgPdfCreator(self, pdfIn, pdfOut, counter):
+        for page in pdfIn:  # iterate through the pages
+            rect = page.MediaBox  # get dimensions of original page
+            pdfOut.insertPage(counter, width=rect[2], height=rect[3])
+            pix = page.getPixmap(matrix=self.mat, alpha=1)  # render page to an image
+            pdfOut[counter].insertImage(rect, pixmap=pix, overlay=False)  # insert pixmap into new page
+            counter += 1
 
     # function to check succesfully merged DOs against external Done List
     def checkForMissing(self, invPath, exDoPath):
