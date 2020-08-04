@@ -23,6 +23,7 @@ class ParseInvoices:
         self.someFoundCount = 0
         self.noneFoundCount = 0
         self.masterDoList = []
+        self.masterDict = {}
 
     def parse_invoice_folder(self, invFolderPath, doFolderPath, incMergedFolder, mergedFolder, invNoDOFolder, invNoMatchFolder, root, progressBar):
         # reset Variables for returning details of files processed
@@ -79,6 +80,9 @@ class ParseInvoices:
                     # append all found do numbers to master doNumberList
                     doNumberList += doMatch
                     doNumberList += dateMatch
+                    # TODO add findall for the email once given
+                    email = re.search("email pattern to search here")
+
 
                 doMatchSize = len(doNumberList)  # Store size of do list
                 print(str(doMatchSize) + " DO Numbers found in file")
@@ -124,6 +128,11 @@ class ParseInvoices:
                             # save the pdf out into merged invoice directory
                             imgPdf.save(mergedFolder + "/imgversion/" + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
                                 + firstDONumber + "IMG.pdf", clean=True, deflate=True)
+
+                            # TODO add email found to dictionary
+                            self.masterDict[mergedFolder + "/imgversion/" + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                                + firstDONumber + "IMG.pdf"] = email
+
                         except Exception as e:
                             print(e)
                             if "cannot remove file" in str(e):
@@ -133,7 +142,6 @@ class ParseInvoices:
                         #     imgPdf.save(
                         #         mergedFolder + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
                         #         + firstDONumber + "IMG.pdf")
-
                         self.masterDoList += doNumberList  # append do numbers to master list if all matches found
 
                     # case where some matches were found

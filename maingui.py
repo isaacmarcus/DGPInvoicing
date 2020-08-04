@@ -51,6 +51,14 @@ class Window(tk.Frame):
         menu.option_add('*tearOff', False)
         self.master.config(menu=menu)
 
+        # set up variables for email/pass/port entries
+        self.emailString = tk.StringVar()
+        self.passString = tk.StringVar()
+        self.subjectString = tk.StringVar()
+        self.subjectString.set("Type subject here...")
+        self.bodyString = tk.StringVar()
+        self.bodyString.set("Type body here...")
+
         # create file drop down menu
         self.fileMenu = tk.Menu(menu)
         self.fileMenu.add_command(label="Email Login", command=self.createEmailWindow)
@@ -63,15 +71,38 @@ class Window(tk.Frame):
 
     def createEmailWindow(self):
         self.emailWindow = tk.Toplevel(self.master, width=Width, height=Height)
-        self.emailWindow.wm_title("Email Login")
-        self.emailText = tk.Text(self.emailWindow, height=1.25, width=40, )
-        self.emailText.grid(row=0, column=0, padx=(10,10), pady=(10,10))
+        self.emailWindow.wm_title("Configure Email")
+        self.emailWindow.resizable(False, False)
+        self.emailWindowTitle = tk.Label(self.emailWindow, text="Configure Emailer", anchor='w', font=20)
+        self.emailWindowTitle.grid(row=0, column=0, padx=(7, 10), pady=(10, 10), sticky="w")
+        self.subjectText = tk.Entry(self.emailWindow, bd=1, width=50, textvariable=self.subjectString, font="Calibri 10")
+        self.subjectText.grid(row=1, column=0, padx=(10, 10), pady=(0, 10), sticky="w")
+        self.bodyText = tk.Text(self.emailWindow, height=15, width=50, font="Calibri 10")
+        self.bodyText.grid(row=2, column=0, padx=(10, 10), pady=(0, 10), sticky="w")
+        self.emailSaveButton = hoverbutton.HoverButton(self.emailWindow, text="Save", relief="flat", bd=1.25,
+                                                       bg=buttonColour,
+                                                       activebackground=hoveringButtonColour,
+                                                       command=lambda: self.updateVariables(),
+                                                       width=10)
+        self.emailSaveButton.grid(row=3, column=0, padx=(10, 10), pady=(0, 10), sticky='w')
+        self.emailSendButton = hoverbutton.HoverButton(self.emailWindow, text="Send", relief="flat", bd=1.25,
+                                                       bg=buttonColour,
+                                                       activebackground=hoveringButtonColour,
+                                                       command=lambda: self.updateVariables(),
+                                                       width=10)
+        self.emailSendButton.grid(row=3, column=0, padx=(10, 10), pady=(0, 10), sticky='e')
         # TODO finish up UI for email login
+
+    def updateVariables(self):
+        self.subjectString.set(self.subjectText.get())
+        self.bodyString.set(self.bodyText.get("1.0", 'end-1c'))
+        # print(self.bodyString.get())
 
 
 class MainGui:
     def __init__(self):
         self.root = tk.Tk(className="DG Merge Invoices/Delivery Orders")
+        self.root.resizable(False, False)
         try:
             self.root.iconphoto(True, tk.PhotoImage(file=rp.resource_path("dg_merge_png.png")))
         except Exception as ex:
@@ -83,9 +114,12 @@ class MainGui:
         # self.root.mainloop()
 
     def setup_gui(self):
-        # create menu bar at the top of window
+
         # TODO fully implement email login using smtplib
-        # self.menuWindow = Window(self.root)
+
+        # create menu bar at the top of window
+        self.menuWindow = Window(self.root)
+
         # Styling for progress bar
         self.style = ttk.Style()
         self.style.theme_use('clam')
@@ -93,6 +127,7 @@ class MainGui:
                              foreground=progressBarColour,
                              darkcolor=progressBarColour, lightcolor=progressBarColour, bordercolor=buttonColour, bd=0)
 
+        # set up string variables for inv,do and external do path
         self.invFolderPath = tk.StringVar()
         self.invFolderPath.set("select invoices folder...")
         self.doFolderPath = tk.StringVar()
@@ -114,8 +149,8 @@ class MainGui:
 
         # Body Label
         self.bodyLabel = tk.Label(self.mainFrame, bg=mainBGColour, text="1. Select folder containing invoices"
-                                                                   "\n2. Select folder containing delivery orders"
-                                                                   "\n3. Click 'Start' to begin merging"
+                                                                        "\n2. Select folder containing delivery orders"
+                                                                        "\n3. Click 'Start' to begin merging"
                                   , anchor="nw", justify="left")
         self.bodyLabel.configure(font=("Helvetica", 12))
         self.bodyLabel.place(relx=0.025, rely=bodyLabelY, relheight=bodyLabelHeight, relwidth=1)
@@ -189,9 +224,9 @@ class MainGui:
                                                    bg=buttonColour,
                                                    activebackground=hoveringButtonColour,
                                                    command=lambda: self.mergeObj.start_merging(self.invFolderPath.get(),
-                                                                                              self.doFolderPath.get(),
-                                                                                              self.root,
-                                                                                              self.progressBar))
+                                                                                               self.doFolderPath.get(),
+                                                                                               self.root,
+                                                                                               self.progressBar))
         self.startButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
         # --------------------------------------------------------
@@ -217,7 +252,8 @@ class MainGui:
         self.exDoPathCheckButton = hoverbutton.HoverButton(self.exDoPathFrame, text="Check", bd=1.25, relief="flat",
                                                            bg=buttonColour,
                                                            activebackground=hoveringButtonColour,
-                                                           command=lambda: self.mergeObj.checkExternalDo(self.invFolderPath.get(), self.exDoFilePath.get()))
+                                                           command=lambda: self.mergeObj.checkExternalDo(
+                                                               self.invFolderPath.get(), self.exDoFilePath.get()))
         self.exDoPathCheckButton.place(relx=0.775, rely=0.1, relheight=0.9, relwidth=0.225)
 
     def get_folder(self, folderPath, title):
@@ -225,7 +261,8 @@ class MainGui:
         folderPath.set(pathSelected)
 
     def get_file(self, filePath, title):
-        pathSelected = askopenfilename(title=title, filetypes=[("Excel Files", "*.xlsm *.xls *.xlsx *.xlsb")])  # ask user to select invoices folder
+        pathSelected = askopenfilename(title=title, filetypes=[
+            ("Excel Files", "*.xlsm *.xls *.xlsx *.xlsb")])  # ask user to select invoices folder
         filePath.set(pathSelected)
 
 

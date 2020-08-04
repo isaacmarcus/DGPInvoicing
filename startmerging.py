@@ -11,6 +11,7 @@ class MergeHandler:
         self.invFolderPath = ""
         self.doFolderPath = ""
         self.invoiceParser = parseinvoices.ParseInvoices()
+        self.masterDict = {}
 
     # Function to process invoices in folder
     def start_merging(self, invFolderSelected, doFolderSelected, root, progressBar):
@@ -52,7 +53,6 @@ class MergeHandler:
         invNoMatchFolder = self.invFolderPath + invNoMatchName + "/"
 
         # Function to parse invoices
-
         parsedInfo = self.invoiceParser.parse_invoice_folder(self.invFolderPath, self.doFolderPath, incMergedFolder, mergedFolder,
                                                         invNoDOFolder, invNoMatchFolder, root, progressBar)
 
@@ -60,6 +60,9 @@ class MergeHandler:
                             + "\nInvoices merged with some missing DOs: " + str(parsedInfo[1]) + "\n"
                             + "Invoices with no matching DOs: " + str(parsedInfo[2]) + "\n"
                             + "Invoices with no DO Numbers found: " + str(parsedInfo[3]))
+
+        # take master dict from lower down the chain
+        self.masterDict = self.invoiceParser.masterDict
 
     def checkExternalDo(self, invPath, exDoPath):
         if exDoPath == "" or exDoPath == "select external delivery order list...":
