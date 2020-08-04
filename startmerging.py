@@ -71,5 +71,9 @@ class MergeHandler:
         else:
             self.invoiceParser.checkForMissing(invPath, exDoPath)
 
+    # TODO finish method to send out emails using dictionary, call method from mailtest.py
+    def sendEmails(self):
+        print("HI")
+
 
 

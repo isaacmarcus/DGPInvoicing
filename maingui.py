@@ -42,9 +42,10 @@ invPathHolderAbsY = doPathHolderAbsY - 43
 
 
 class Window(tk.Frame):
-    def __init__(self, master=None):
+    def __init__(self, master=None, mergeObj=None):
         tk.Frame.__init__(self, master)
         self.master = master
+        self.mergeObj = mergeObj
 
         menu = tk.Menu(self.master)
         # remove tear off in menu
@@ -88,15 +89,16 @@ class Window(tk.Frame):
         self.emailSendButton = hoverbutton.HoverButton(self.emailWindow, text="Send", relief="flat", bd=1.25,
                                                        bg=buttonColour,
                                                        activebackground=hoveringButtonColour,
-                                                       command=lambda: self.updateVariables(),
+                                                       command=lambda: self.mergeObj.sendEmails(),
                                                        width=10)
         self.emailSendButton.grid(row=3, column=0, padx=(10, 10), pady=(0, 10), sticky='e')
-        # TODO finish up UI for email login
 
     def updateVariables(self):
         self.subjectString.set(self.subjectText.get())
         self.bodyString.set(self.bodyText.get("1.0", 'end-1c'))
         # print(self.bodyString.get())
+
+
 
 
 class MainGui:
@@ -115,10 +117,10 @@ class MainGui:
 
     def setup_gui(self):
 
-        # TODO fully implement email login using smtplib
+        # TODO fully implement email login using pywin32
 
         # create menu bar at the top of window
-        self.menuWindow = Window(self.root)
+        self.menuWindow = Window(self.root, self.mergeObj)
 
         # Styling for progress bar
         self.style = ttk.Style()
