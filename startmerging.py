@@ -30,19 +30,18 @@ class MergeHandler:
 
         # Names for output folders to be defined here;
         mergedName = "Merged Invoices"
+        mergedNameIMG = mergedName + "/imgversion"
         incMergedName = "Merged Invoices Incomplete"
         invNoDoName = "Invoice no Do Number"
         invNoMatchName = "Invoice no Matching DO"
+        folderList = [mergedName, mergedNameIMG, incMergedName, invNoDoName, invNoMatchName]
 
         # make a directory for invoices missing DO as well as completed merged invoices
         try:
-            # TODO fix bug where if one of the folders has already been created, it stops it entirely, or does not create remaining folders
             print("Creating output folders...")
-            os.mkdir(self.invFolderPath + incMergedName)
-            os.mkdir(self.invFolderPath + mergedName)
-            os.mkdir(self.invFolderPath + mergedName + "/imgversion")
-            os.mkdir(self.invFolderPath + invNoDoName)
-            os.mkdir(self.invFolderPath + invNoMatchName)
+            for folder in folderList:
+                if not os.path.exists(self.invFolderPath + folder):
+                    os.mkdir(self.invFolderPath + folder)
         except Exception as e:
             print("Output directory already exists, program will not create them again" + "\n")
 

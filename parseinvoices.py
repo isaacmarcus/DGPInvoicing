@@ -14,6 +14,8 @@ import fitz
 re_param2 = "[\d]{1,2}€[A-Za-z]{3}€[\d]{4}\\n[\d]{7}\\n"
 # A€123456
 re_param = "A€[\d]{6}"
+# DO-0912093 TODO add in new DO number format
+re_param3 = "DO-"
 
 
 class ParseInvoices:
@@ -77,12 +79,13 @@ class ParseInvoices:
                     # Search for all matches of do numbers without "A"
                     dateMatch = re.findall(re_param2, Text)
                     dateMatch = [newDO[-8:-1] for newDO in dateMatch]  # only take the do number
+                    # Search for all matches of do numbers with "DO" TODO add in re.findall for new DO format
+
                     # append all found do numbers to master doNumberList
                     doNumberList += doMatch
                     doNumberList += dateMatch
                     # TODO add findall for the email once given
-                    email = re.search("email pattern to search here")
-
+                    # email = re.search("email pattern to search here")
 
                 doMatchSize = len(doNumberList)  # Store size of do list
                 print(str(doMatchSize) + " DO Numbers found in file")
