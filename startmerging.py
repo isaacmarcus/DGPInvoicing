@@ -43,7 +43,7 @@ class MergeHandler:
                 if not os.path.exists(self.invFolderPath + folder):
                     os.mkdir(self.invFolderPath + folder)
         except Exception as e:
-            print("Output directory already exists, program will not create them again" + "\n")
+            print("Error creating folders: " + e + "\n")
 
         # Create absolute folder path name variables
         incMergedFolder = self.invFolderPath + incMergedName + "/"

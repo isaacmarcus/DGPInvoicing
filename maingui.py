@@ -5,7 +5,7 @@ import startmerging
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
-appVersion = 1.9
+appVersion = "1.9.1"
 print("Merge Invoice Tool " + str(appVersion) + "\n")
 
 # colours

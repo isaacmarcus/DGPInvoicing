@@ -15,7 +15,7 @@ re_param2 = "[\d]{1,2}€[A-Za-z]{3}€[\d]{4}\\n[\d]{7}\\n"
 # A€123456
 re_param = "A€[\d]{6}"
 # DO-0912093 TODO add in new DO number format
-re_param3 = "DO-"
+re_param3 = "DO[\d]{2}-[\d]{5}"
 
 
 class ParseInvoices:
@@ -80,10 +80,12 @@ class ParseInvoices:
                     dateMatch = re.findall(re_param2, Text)
                     dateMatch = [newDO[-8:-1] for newDO in dateMatch]  # only take the do number
                     # Search for all matches of do numbers with "DO" TODO add in re.findall for new DO format
-
+                    do3Match = re.findall(re_param3, Text)
+                    # print(do3Match)
                     # append all found do numbers to master doNumberList
                     doNumberList += doMatch
                     doNumberList += dateMatch
+                    doNumberList += do3Match
                     # TODO add findall for the email once given
                     # email = re.search("email pattern to search here")
 
@@ -133,8 +135,8 @@ class ParseInvoices:
                                 + firstDONumber + "IMG.pdf", clean=True, deflate=True)
 
                             # TODO add email found to dictionary
-                            self.masterDict[mergedFolder + "/imgversion/" + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
-                                + firstDONumber + "IMG.pdf"] = email
+                            # self.masterDict[mergedFolder + "/imgversion/" + filename.replace(".pdf", "") + "_" + str(doMatchSize) + "DO" + "_"
+                            #     + firstDONumber + "IMG.pdf"] = email
 
                         except Exception as e:
                             print(e)
