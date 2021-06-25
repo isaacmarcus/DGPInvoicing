@@ -83,9 +83,16 @@ class ParseInvoices:
                     do3Match = re.findall(re_param3, Text)
                     # print(do3Match)
                     # append all found do numbers to master doNumberList
-                    doNumberList += doMatch
-                    doNumberList += dateMatch
-                    doNumberList += do3Match
+                    # Check if there are duplicates before adding to master list
+                    for u in range(0, len(doMatch)):
+                        if doMatch[u] not in doNumberList:
+                            doNumberList.append(doMatch[u])
+                    for u in range(0, len(dateMatch)):
+                        if dateMatch[u] not in doNumberList:
+                            doNumberList.append(dateMatch[u])
+                    for u in range(0, len(do3Match)):
+                        if do3Match[u] not in doNumberList:
+                            doNumberList.append(do3Match[u])
                     # TODO add findall for the email once given
                     # email = re.search("email pattern to search here")
 

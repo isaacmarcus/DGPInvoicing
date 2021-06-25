@@ -62,7 +62,7 @@ class Window(tk.Frame):
 
         # create file drop down menu
         self.fileMenu = tk.Menu(menu)
-        self.fileMenu.add_command(label="Email Login", command=self.createEmailWindow)
+        # self.fileMenu.add_command(label="Email Login", command=self.createEmailWindow)
         self.fileMenu.add_command(label="Exit", command=self.exitProgram)
         # cascade file drop down to main menu line
         menu.add_cascade(label="File", menu=self.fileMenu)
