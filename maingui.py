@@ -5,7 +5,7 @@ import startmerging
 import tkinter.ttk as ttk
 from tkinter.filedialog import askdirectory, askopenfilename
 
-appVersion = "1.9.1"
+appVersion = "1.9.3"
 print("Merge Invoice Tool " + str(appVersion) + "\n")
 
 # colours
@@ -107,6 +107,7 @@ class MainGui:
         self.root.resizable(False, False)
         try:
             self.root.iconphoto(True, tk.PhotoImage(file=rp.resource_path("dg_merge_png.png")))
+            # self.root.iconbitmap(default=rp.resource_path("dg_merge.ico"))
         except Exception as ex:
             print(ex)
         self.mergeObj = startmerging.MergeHandler()
@@ -272,4 +273,7 @@ if __name__ == "__main__":
     ui = MainGui()
     ui.root.mainloop()
 
-# pyinstaller.exe -w --onefile --clean --icon dg_merge.ico -n MergeInvoiceTool1.5 maingui.py
+# Run line below to build onefile exe
+# pyinstaller.exe -w --onefile InvoiceMergeTool.spec --clean --icon dg_merge.ico -n MergeInvoiceTool_1.9.3 maingui.py
+# Run line below to build onefile exe from spec
+# pyinstaller.exe -w --onefile InvoiceMergeTool.spec --clean

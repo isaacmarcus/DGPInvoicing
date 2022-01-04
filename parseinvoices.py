@@ -10,12 +10,15 @@ import fitz
 
 
 # Regex patterns for DO Numbers to be found
-# 4€May€2020\n7077852
-re_param2 = "[\d]{1,2}€[A-Za-z]{3}€[\d]{4}\\n[\d]{7}\\n"
+
 # A€123456
 re_param = "A€[\d]{6}"
+# 4€May€2020\n7077852
+re_param2 = "[\d]{1,2}€[A-Za-z]{3}€[\d]{4}\\n[\d]{7}\\n"
 # DO-0912093 TODO add in new DO number format
 re_param3 = "DO[\d]{2}-[\d]{5}"
+# 4€May€2020\n20170833505 or 83020176257
+re_param4 = "[\d]{1,2}€[A-Za-z]{3}€[\d]{4}\\n[\d]{11}\\n"
 
 
 class ParseInvoices:
@@ -79,9 +82,12 @@ class ParseInvoices:
                     # Search for all matches of do numbers without "A"
                     dateMatch = re.findall(re_param2, Text)
                     dateMatch = [newDO[-8:-1] for newDO in dateMatch]  # only take the do number
-                    # Search for all matches of do numbers with "DO" TODO add in re.findall for new DO format
+                    # Search for all matches of do numbers with "DO"
                     do3Match = re.findall(re_param3, Text)
                     # print(do3Match)
+                    # Search for all matches of do numbers that are either: 20170833376 or 83020176257
+                    do4Match = re.findall(re_param4, Text)
+                    do4Match = [newDO[-12:-1] for newDO in do4Match]  # only take do number
                     # append all found do numbers to master doNumberList
                     # Check if there are duplicates before adding to master list
                     for u in range(0, len(doMatch)):
@@ -93,6 +99,10 @@ class ParseInvoices:
                     for u in range(0, len(do3Match)):
                         if do3Match[u] not in doNumberList:
                             doNumberList.append(do3Match[u])
+                    for u in range(0, len(do4Match)):
+                        if do4Match[u] not in doNumberList:
+                            doNumberList.append(do4Match[u])
+                            print(do4Match[u])
                     # TODO add findall for the email once given
                     # email = re.search("email pattern to search here")
 
@@ -100,7 +110,7 @@ class ParseInvoices:
                 print(str(doMatchSize) + " DO Numbers found in file")
                 # If any DO number numbers were found, proceed
                 if doMatchSize > 0:
-                    print("Now finding for matches in DO folder...")
+                    print("Now finding match in DO folder...")
                     firstDONumber = doNumberList[0].replace("€", "")
                     doMatchCounter = 0
                     # pdfOutMerge = PyPDF2.PdfFileMerger()
@@ -194,7 +204,7 @@ class ParseInvoices:
             pdfOut[counter].insertImage(rect, pixmap=pix, overlay=False)  # insert pixmap into new page
             counter += 1
 
-    # function to check succesfully merged DOs against external Done List
+    # function to check successfully merged DOs against external Done List
     def checkForMissing(self, invPath, exDoPath):
         if self.masterDoList:
             for i in range(len(self.masterDoList)):
