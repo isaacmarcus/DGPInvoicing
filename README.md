@@ -1,3 +1,5 @@
+![preview_img](https://github.com/isaacmarcus/DGPInvoicing/blob/master/dgpinv_ss.png?raw=true)
+ 
 # DGP Invoice Merge Tool
 
 A Python desktop program that lets users automate the merging of PDF invoices to relevant documents associated. This uses the method of reading PDFs as text and regex to find specific letter and number combinations.
@@ -16,6 +18,4 @@ A Python desktop program that lets users automate the merging of PDF invoices to
 - PyPdf2
 - fitz
 
-## App Preview
-![preview_img](https://github.com/isaacmarcus/DGPInvoicing/blob/master/dgpinv_ss.png?raw=true)
- 
+
